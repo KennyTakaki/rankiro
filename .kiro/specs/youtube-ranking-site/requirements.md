@@ -14,7 +14,7 @@ This feature will create a Kiro analytics and discovery dashboard that displays 
 
 1. WHEN a user visits the homepage THEN the system SHALL display a graph showing cumulative Kiro video submissions over time
 2. WHEN displaying trend data THEN the system SHALL show total view counts for all Kiro videos represented in a visual chart
-3. WHEN the analytics data is updated THEN the system SHALL refresh the displayed trends within 1 hour
+3. WHEN the analytics data is updated THEN the system SHALL refresh the displayed trends according to the configured update frequency (default: 24 hours)
 4. IF trend data is unavailable THEN the system SHALL display the most recent cached analytics with a timestamp
 
 ### Requirement 2

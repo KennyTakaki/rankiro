@@ -53,6 +53,7 @@ interface RankingSystemConfig {
   
   // Data Collection
   collectionFrequency: number;   // Minutes between data collection runs
+  trendUpdateFrequency: number;  // Hours between trend analytics updates (default: 24)
   maxVideosPerSearch: number;    // Limit videos per search query
   
   // Performance & Scaling
@@ -323,6 +324,7 @@ export const kiroConfig: RankingSystemConfig = {
   brandName: 'Kiro Analytics Dashboard',
   primaryColor: '#FF9900', // AWS Orange
   collectionFrequency: 30,
+  trendUpdateFrequency: 24, // Update trends every 24 hours
   maxVideosPerSearch: 50,
   cacheRetentionHours: 24,
   maxConcurrentUsers: 500,
