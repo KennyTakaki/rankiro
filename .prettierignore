@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+cdk.out/
+
+# Coverage
+coverage/
+
+# Cache
+.turbo/
+.cache/
+
+# Logs
+*.log
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
