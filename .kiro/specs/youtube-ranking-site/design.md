@@ -14,15 +14,12 @@ graph TB
     B --> C[API Gateway]
     C --> D[Lambda Analytics Function]
     C --> E[Lambda Video Function]
-    D --> F[RDS PostgreSQL]
+    D --> F[DynamoDB Tables]
     E --> F
     E --> G[YouTube API]
     H[EventBridge Scheduler] --> I[Lambda Data Collector]
     I --> G
     I --> F
-    J[ElastiCache Redis] --> F
-    D --> J
-    E --> J
     K[CDK Stack] --> L[All AWS Resources]
 ```
 
@@ -31,10 +28,9 @@ graph TB
 1. **CloudFront + S3** - Static website hosting for React dashboard
 2. **API Gateway** - RESTful API with Lambda integration
 3. **Lambda Functions** - Serverless compute for analytics, video service, and data collection
-4. **RDS PostgreSQL** - Managed database for structured data storage
-5. **ElastiCache Redis** - Managed cache for performance optimization
-6. **EventBridge** - Scheduled data collection triggers
-7. **CDK Stack** - Infrastructure as Code deployment and configuration
+4. **DynamoDB** - Serverless NoSQL database for video data and analytics
+5. **EventBridge** - Scheduled data collection triggers
+6. **CDK Stack** - Infrastructure as Code deployment and configuration
 
 ### CDK Configuration Parameters
 
@@ -57,7 +53,7 @@ interface RankingSystemConfig {
   maxVideosPerSearch: number;    // Limit videos per search query
   
   // Performance & Scaling
-  cacheRetentionHours: number;   // Redis cache retention
+  cacheTTLMinutes: number;       // Lambda in-memory cache TTL (default: 5 minutes)
   maxConcurrentUsers: number;    // Expected concurrent user load
   
   // Environment
@@ -73,7 +69,7 @@ The system supports multiple keyword deployments through:
 1. **Isolated Stacks**: Each keyword gets its own CDK stack with isolated resources
 2. **Shared Components**: Common Lambda layers and utility functions are shared
 3. **Environment Separation**: Dev/staging/prod environments per keyword
-4. **Cost Optimization**: Shared RDS instances for multiple keywords in non-prod environments
+4. **Cost Optimization**: DynamoDB on-demand pricing scales to zero when not in use
 
 ## Components and Interfaces
 
@@ -155,7 +151,7 @@ cdk/
 │   ├── constructs/
 │   │   ├── frontend-construct.ts    # S3 + CloudFront
 │   │   ├── api-construct.ts         # API Gateway + Lambda
-│   │   ├── database-construct.ts    # RDS + ElastiCache
+│   │   ├── database-construct.ts    # DynamoDB Tables
 │   │   └── collector-construct.ts   # EventBridge + Lambda
 │   └── config/
 │       ├── kiro-config.ts          # Kiro-specific configuration
@@ -171,49 +167,87 @@ cdk/
 
 ## Data Models
 
-### Database Schema
+### DynamoDB Table Design
 
 #### Videos Table
-```sql
-CREATE TABLE videos (
-  id VARCHAR(20) PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  channel_id VARCHAR(50) NOT NULL,
-  channel_name VARCHAR(100) NOT NULL,
-  upload_date TIMESTAMP NOT NULL,
-  duration INTEGER, -- seconds
-  thumbnail_url TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
+```typescript
+interface VideoItem {
+  PK: string;           // "VIDEO#{videoId}"
+  SK: string;           // "METADATA"
+  videoId: string;      // YouTube video ID
+  title: string;
+  description?: string;
+  channelId: string;
+  channelName: string;
+  uploadDate: string;   // ISO date string
+  duration: number;     // seconds
+  thumbnailUrl: string;
+  createdAt: string;    // ISO timestamp
+  updatedAt: string;    // ISO timestamp
+  GSI1PK: string;       // "CHANNEL#{channelId}"
+  GSI1SK: string;       // uploadDate for sorting
+}
 ```
 
-#### Video Stats Table
-```sql
-CREATE TABLE video_stats (
-  id SERIAL PRIMARY KEY,
-  video_id VARCHAR(20) REFERENCES videos(id),
-  view_count BIGINT NOT NULL,
-  like_count INTEGER,
-  comment_count INTEGER,
-  recorded_at TIMESTAMP DEFAULT NOW(),
-  INDEX idx_video_recorded (video_id, recorded_at)
-);
+#### Video Stats Table (Time Series Data)
+```typescript
+interface VideoStatsItem {
+  PK: string;           // "VIDEO#{videoId}"
+  SK: string;           // "STATS#{timestamp}"
+  videoId: string;
+  viewCount: number;
+  likeCount?: number;
+  commentCount?: number;
+  recordedAt: string;   // ISO timestamp
+  GSI1PK: string;       // "STATS#{date}" for daily aggregation
+  GSI1SK: string;       // "#{videoId}#{timestamp}"
+}
 ```
 
-#### Daily Rankings Table
-```sql
-CREATE TABLE daily_rankings (
-  id SERIAL PRIMARY KEY,
-  video_id VARCHAR(20) REFERENCES videos(id),
-  rank_date DATE NOT NULL,
-  rank_position INTEGER NOT NULL,
-  view_count BIGINT NOT NULL,
-  period_type ENUM('daily', 'weekly', 'monthly') NOT NULL,
-  UNIQUE KEY unique_ranking (video_id, rank_date, period_type)
-);
+#### Rankings Table
+```typescript
+interface RankingItem {
+  PK: string;           // "RANKING#{period}#{date}" (e.g., "RANKING#daily#2024-01-15")
+  SK: string;           // "#{rank:03d}#{videoId}" (e.g., "001#abc123")
+  videoId: string;
+  rankPosition: number;
+  viewCount: number;
+  periodType: 'daily' | 'weekly' | 'monthly';
+  rankDate: string;     // ISO date string
+  GSI1PK: string;       // "VIDEO#{videoId}"
+  GSI1SK: string;       // "RANK#{period}#{date}"
+}
 ```
+
+#### Analytics Aggregates Table
+```typescript
+interface AnalyticsItem {
+  PK: string;           // "ANALYTICS#{period}" (e.g., "ANALYTICS#daily")
+  SK: string;           // date (e.g., "2024-01-15")
+  date: string;
+  videoCount: number;   // New videos on this date
+  totalViews: number;   // Total views for all videos on this date
+  cumulativeVideos: number; // Running total of videos
+  cumulativeViews: number;  // Running total of views
+  periodType: 'daily' | 'weekly' | 'monthly';
+  GSI1PK: string;       // "TRENDS"
+  GSI1SK: string;       // "#{period}#{date}"
+}
+```
+
+### DynamoDB Access Patterns
+
+#### Primary Access Patterns
+1. **Get Video Details**: `PK = "VIDEO#{videoId}", SK = "METADATA"`
+2. **Get Video Stats History**: `PK = "VIDEO#{videoId}", SK begins_with "STATS#"`
+3. **Get Rankings by Period**: `PK = "RANKING#{period}#{date}"`
+4. **Get Analytics Trends**: `PK = "ANALYTICS#{period}"`
+
+#### Global Secondary Index (GSI1) Patterns
+1. **Videos by Channel**: `GSI1PK = "CHANNEL#{channelId}"`
+2. **Stats by Date**: `GSI1PK = "STATS#{date}"`
+3. **Video Rankings**: `GSI1PK = "VIDEO#{videoId}", GSI1SK begins_with "RANK#"`
+4. **Trend Analysis**: `GSI1PK = "TRENDS"`
 
 ### Data Processing Pipeline
 
@@ -287,10 +321,10 @@ interface ErrorResponse {
 - **Image Optimization**: Lazy load video thumbnails
 
 ### Backend Optimization
-- **Database Indexing**: Optimize queries for rankings and trends
-- **Caching Strategy**: Redis for frequently accessed data
+- **DynamoDB Design**: Single-table design with efficient access patterns
+- **Caching Strategy**: Lambda in-memory caching for frequently accessed data
 - **API Rate Limiting**: Prevent abuse and ensure fair usage
-- **Connection Pooling**: Efficient database connection management
+- **Batch Operations**: Use DynamoDB batch operations for bulk writes
 
 ### Data Collection Optimization
 - **Batch Processing**: Collect multiple videos per API call
@@ -327,7 +361,7 @@ export const kiroConfig: RankingSystemConfig = {
   collectionFrequency: 30,
   trendUpdateFrequency: 24, // Update trends every 24 hours
   maxVideosPerSearch: 50,
-  cacheRetentionHours: 24,
+  cacheTTLMinutes: 5, // Lambda in-memory cache TTL
   maxConcurrentUsers: 500,
   environment: 'prod'
 };
@@ -348,14 +382,15 @@ cdk deploy RankingSystem-react-prod --context config=react-config --context env=
 ### Environment Management
 
 #### AWS Resources per Environment
-- **Development**: Smaller RDS instance, reduced Lambda memory, basic monitoring
-- **Staging**: Production-like setup with reduced capacity
-- **Production**: Full capacity, enhanced monitoring, backup strategies
+- **Development**: DynamoDB on-demand mode, basic Lambda memory, basic monitoring
+- **Staging**: DynamoDB on-demand mode, production-like Lambda settings
+- **Production**: DynamoDB provisioned mode (if predictable traffic), enhanced monitoring
 
 #### Cost Optimization
-- **Shared Resources**: RDS instances shared across dev environments
+- **DynamoDB On-Demand**: Scales to zero when not in use, perfect for dev/staging
 - **Auto-scaling**: Lambda concurrency limits based on expected load
-- **Scheduled Shutdown**: Dev environments can be scheduled to stop during off-hours
+- **Data Lifecycle**: Implement TTL for old video stats to reduce storage costs
+- **Lambda Caching**: Use in-memory caching within Lambda functions for cost-effective performance
 
 ## Security Considerations
 
@@ -367,12 +402,12 @@ cdk deploy RankingSystem-react-prod --context config=react-config --context env=
 
 ### Infrastructure Security
 - **IAM Roles**: Least privilege access for all Lambda functions
-- **VPC Configuration**: Database and cache in private subnets
-- **Encryption**: RDS encryption at rest, API Gateway with TLS
+- **DynamoDB Encryption**: Encryption at rest and in transit
+- **API Gateway**: TLS encryption for all API communications
 - **WAF Integration**: Web Application Firewall for CloudFront
 
 ### Data Protection
 - **No Personal Data**: Only collect public YouTube metadata
-- **Data Retention**: Implement lifecycle policies via CDK parameters
+- **Data Retention**: Implement DynamoDB TTL for automatic data lifecycle management
 - **Audit Logging**: CloudTrail for infrastructure changes, CloudWatch for application logs
-- **Backup Strategy**: Automated RDS backups with point-in-time recovery
+- **Backup Strategy**: DynamoDB point-in-time recovery and on-demand backups
