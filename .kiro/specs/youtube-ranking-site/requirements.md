@@ -24,9 +24,10 @@ This feature will create a Kiro analytics and discovery dashboard that displays 
 #### Acceptance Criteria
 
 1. WHEN a user views the homepage THEN the system SHALL display separate rankings for daily, weekly, and monthly most-viewed Kiro videos
-2. WHEN displaying time-based rankings THEN the system SHALL show at least the top 10 videos for each time period
+2. WHEN displaying time-based rankings THEN the system SHALL show a configurable number of top videos for each time period (user-adjustable, default: 10)
 3. WHEN rankings are updated THEN the system SHALL refresh daily, weekly, and monthly data according to their respective schedules
 4. IF insufficient data exists for a time period THEN the system SHALL display available videos and indicate the limited dataset
+5. WHEN a user wants to see more or fewer videos THEN the system SHALL provide application controls to adjust the number of displayed videos per ranking (e.g., 5, 10, 20, 50)
 
 ### Requirement 3
 

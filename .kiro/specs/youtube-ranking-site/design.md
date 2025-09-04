@@ -94,6 +94,7 @@ The system supports multiple keyword deployments through:
 - **VideoCard**: Individual video display with thumbnail, title, metadata
 - **RankingList**: Ordered list of videos for each time period
 - **TimeSelector**: Tabs for Daily/Weekly/Monthly rankings
+- **VideoCountSelector**: Dropdown/buttons for adjusting number of displayed videos (5, 10, 20, 50)
 
 ### Backend Services
 
@@ -121,7 +122,7 @@ interface ViewMetrics {
 #### Video Service API
 ```typescript
 interface VideoAPI {
-  getRankings(period: 'daily' | 'weekly' | 'monthly'): Promise<VideoRanking[]>
+  getRankings(period: 'daily' | 'weekly' | 'monthly', limit?: number): Promise<VideoRanking[]>
   getVideoDetails(videoId: string): Promise<VideoDetails>
   searchVideos(query: string): Promise<VideoDetails[]>
 }
