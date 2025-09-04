@@ -1,5 +1,26 @@
 # Implementation Plan
 
+## Critical Path
+
+The following tasks represent the critical path for establishing a functional monorepo. These tasks must be completed in order and are dependencies for most other work:
+
+1. **Task 1** - Initialize monorepo structure and workspace configuration
+2. **Task 2.1** - Create shared TypeScript configuration package  
+3. **Task 2.2** - Create shared ESLint configuration package
+4. **Task 3.1** - Create packages/rankiro core business logic package
+5. **Task 3.2** - Create packages/cdk-utils AWS infrastructure utilities package
+6. **Task 4** - Set up web application structure
+7. **Task 5.1** - Set up Turborepo configuration and pipeline
+8. **Task 6.1** - Set up Jest testing framework with TypeScript support
+
+After completing the critical path, you can work on the remaining tasks in parallel or based on priority:
+- Security tools (Tasks 7.1, 7.2)
+- CI/CD pipeline (Tasks 8.1, 8.2, 8.3)
+- Documentation and utilities (Tasks 9.1, 9.2)
+- Validation and optimization (Tasks 10.1, 10.2)
+
+## Tasks
+
 - [ ] 1. Initialize monorepo structure and workspace configuration
   - Create root directory structure with apps/, packages/, and tools/ folders
   - Set up pnpm workspace configuration with pnpm-workspace.yaml
