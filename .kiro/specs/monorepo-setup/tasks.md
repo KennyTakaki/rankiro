@@ -21,7 +21,7 @@ After completing the critical path, you can work on the remaining tasks in paral
 
 ## Tasks
 
-- [ ] 1. Initialize monorepo structure and workspace configuration
+- [-] 1. Initialize monorepo structure and workspace configuration
   - Create root directory structure with apps/, packages/, and tools/ folders
   - Set up pnpm workspace configuration with pnpm-workspace.yaml
   - Create root package.json with workspace dependencies and scripts

@@ -118,3 +118,26 @@ jest.config.js.map
 
 # Husky
 .husky/_
+
+# IDE and editor files
+*.sublime-project
+*.sublime-workspace
+.idea/
+*.iml
+
+# Package manager files
+.pnpm-store/
+.yarn/
+.yarnrc.yml
+
+# Testing
+__tests__/
+*.test.js.map
+*.spec.js.map
+
+# Linting
+.eslintcache
+
+# Security
+.env.example
+secrets/
