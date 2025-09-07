@@ -5,8 +5,8 @@
     "description": "Monorepo for Rankiro application with CDK infrastructure and web frontend",
     "type": "module",
     "engines": {
-        "node": ">=22.0.0",
-        "pnpm": ">=10.15.0"
+        "node": ">=18.0.0",
+        "pnpm": ">=9.0.0"
     },
     "packageManager": "pnpm@10.15.0",
     "scripts": {
@@ -20,7 +20,7 @@
         "clean:all": "turbo run clean && rm -rf node_modules .turbo",
         "format:all": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
         "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-        "prepare": "husky install",
+        "prepare": "husky",
         "audit": "pnpm audit --audit-level moderate",
         "update-deps": "pnpm update --recursive",
         "reset": "pnpm clean && rm -rf pnpm-lock.yaml && pnpm install"
