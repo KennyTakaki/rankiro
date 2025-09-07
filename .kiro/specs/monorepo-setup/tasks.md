@@ -44,7 +44,7 @@ After completing the critical path, you can work on the remaining tasks in paral
     - _Requirements: 2.1, 2.2, 2.4_
 
 - [ ] 3. Implement core packages structure
-  - [ ] 3.1 Create packages/rankiro core business logic package
+  - [x] 3.1 Create packages/rankiro core business logic package
     - Set up TypeScript package structure with src/, dist/, and test/ directories
     - Create package.json with proper ESModules exports and TypeScript declarations
     - Implement basic interfaces for RankingService and DataProcessor
