@@ -1,0 +1,44 @@
+{
+    "name": "@frommiddle/eslint-config",
+    "version": "1.0.0",
+    "description": "Shared ESLint configuration for Rankiro monorepo",
+    "type": "module",
+    "exports": {
+        ".": "./index.js",
+        "./react": "./react.js",
+        "./node": "./node.js"
+    },
+    "files": [
+        "index.js",
+        "react.js",
+        "node.js"
+    ],
+    "keywords": [
+        "eslint",
+        "config",
+        "typescript",
+        "monorepo"
+    ],
+    "author": "Rankiro Team",
+    "license": "MIT",
+    "dependencies": {
+        "@typescript-eslint/eslint-plugin": "^8.42.0",
+        "@typescript-eslint/parser": "^8.42.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-jsx-a11y": "^6.10.2",
+        "eslint-plugin-react": "^7.37.2",
+        "eslint-plugin-react-hooks": "^5.0.0"
+    },
+    "peerDependencies": {
+        "eslint": "^9.0.0",
+        "prettier": "^3.0.0",
+        "typescript": "^5.0.0"
+    },
+    "devDependencies": {
+        "@frommiddle/tsconfig": "workspace:*",
+        "eslint": "^9.35.0",
+        "prettier": "^3.4.2",
+        "typescript": "^5.9.2"
+    }
+}

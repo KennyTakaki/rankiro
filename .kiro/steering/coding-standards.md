@@ -21,7 +21,7 @@ inclusion: always
 - **Dependencies**: Use workspace references (`workspace:*`) for internal dependencies
 
 ## Code Quality
-- **Linting**: Use shared ESLint configuration from `@monorepo/eslint-config`
+- **Linting**: Use shared ESLint configuration from `@frommiddle/eslint-config`
 - **Formatting**: Use Prettier with consistent configuration across all packages
 - **Testing**: Write comprehensive unit tests with Jest and ts-jest
 - **Documentation**: Include JSDoc comments for public APIs
