@@ -1,0 +1,70 @@
+{
+    "name": "@frommiddle/cdk-utils",
+    "version": "1.0.0",
+    "description": "AWS CDK utility functions and helpers for Rankiro infrastructure",
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./naming": {
+            "types": "./dist/naming/index.d.ts",
+            "import": "./dist/naming/index.js"
+        },
+        "./config": {
+            "types": "./dist/config/index.d.ts",
+            "import": "./dist/config/index.js"
+        },
+        "./constructs": {
+            "types": "./dist/constructs/index.d.ts",
+            "import": "./dist/constructs/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "build:watch": "tsc --watch",
+        "dev": "tsc --watch",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "lint": "eslint src --ext .ts,.tsx",
+        "lint:fix": "eslint src --ext .ts,.tsx --fix",
+        "type-check": "tsc --noEmit",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "aws",
+        "cdk",
+        "infrastructure",
+        "utilities",
+        "typescript"
+    ],
+    "author": "Rankiro Team",
+    "license": "MIT",
+    "peerDependencies": {
+        "aws-cdk-lib": "^2.100.0",
+        "constructs": "^10.0.0"
+    },
+    "devDependencies": {
+        "@frommiddle/tsconfig": "workspace:*",
+        "@frommiddle/eslint-config": "workspace:*",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.10.2",
+        "aws-cdk-lib": "^2.100.0",
+        "constructs": "^10.0.0",
+        "eslint": "^9.35.0",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.2.5",
+        "typescript": "^5.9.2"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

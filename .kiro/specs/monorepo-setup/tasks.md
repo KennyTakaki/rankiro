@@ -43,7 +43,7 @@ After completing the critical path, you can work on the remaining tasks in paral
     - Create package.json with ESLint dependencies and exports
     - _Requirements: 2.1, 2.2, 2.4_
 
-- [ ] 3. Implement core packages structure
+- [x] 3. Implement core packages structure
   - [x] 3.1 Create packages/rankiro core business logic package
     - Set up TypeScript package structure with src/, dist/, and test/ directories
     - Create package.json with proper ESModules exports and TypeScript declarations
@@ -51,7 +51,7 @@ After completing the critical path, you can work on the remaining tasks in paral
     - Set up Jest configuration with ts-jest for TypeScript testing
     - _Requirements: 1.1, 1.2, 5.1, 5.2_
 
-  - [ ] 3.2 Create packages/cdk-utils AWS infrastructure utilities package
+  - [x] 3.2 Create packages/cdk-utils AWS infrastructure utilities package
     - Set up CDK utilities package structure with TypeScript configuration
     - Implement CDKNamingUtils class with environment-aware resource naming
     - Create EnvironmentConfig interface and context reading utilities
